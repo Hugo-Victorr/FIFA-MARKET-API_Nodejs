@@ -36,14 +36,16 @@ app.post('/auth/register', async(req, res) => {
         return res.status(422).json({ msg: 'O nome é obrigatorio!'})
     }
 })
-// const dbUser = process.env.DB_USER
-// const dbPassword = process.env.DB_PASS
 
-const dbUser = 'oliveiralimahugov'
-const dbPassword = '9JyyAFfFXVRKM8r6'
+const dbUser = process.env.DB_USER
+const dbPassword = process.env.DB_PASS
+
+// console.log('user: ' + dbUser) 
+// console.log('password: ' + dbPassword)
 
 mongoose.connect(
     `mongodb+srv://${dbUser}:${dbPassword}@cluster0.wr9w6qa.mongodb.net/sample_mflix?retryWrites=true&w=majority&appName=Cluster0`,
+    // `mongodb://localhost:27017/sample_mflix`,
 ).then(() => {
     app.listen(3000)
     console.log('Conectou ao banco!')
