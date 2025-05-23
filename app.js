@@ -7,13 +7,15 @@ const jwt = require("jsonwebtoken");
 const app = express();
 
 
-// const User = require("./models/User");
+// const User = require("./models/User"); 
 
 app.use(express.json());
 
+const User = require('./models/User')
+
 app.get("/", (req, res) => {
     res.status(200).json({ msg: "Bem vindo a API!"});
-});
+}); 
 // app.listen(3000)
 
 
@@ -29,22 +31,58 @@ app.get("/", (req, res) => {
 //     res.status(200).json({ user });
 // });
 
-app.post('/auth/register', async(req, res) => {
+app.post('/auth/register', async(req, res) => { 
     const {name, email, password, confirmpassword} = req.body
 
     if(!name){
         return res.status(422).json({ msg: 'O nome é obrigatorio!'})
     }
+
+    if(!email){
+        return res.status(422).json({ msg: 'O email é obrigatorio!'})
+    }
+
+    if(!password){
+        return res.status(422).json({ msg: 'A senha é obrigatoria!'})
+    }
+
+    if(password !== confirmpassword){
+        return res.status(422).json({ msg: 'As senhas não conferem!'})
+    }
+    const userExists = await User.findOne( {email: email})
+
+    if(userExists){
+        return res.status(422).json({ msg: 'Email já está sendo usado, escolha outro!'})
+    }
+
+    const salt = await bcrypt.genSalt(12)
+    const passwordHash = await bcrypt.hash(password, salt)
+
+    const user = User({
+        name,
+        email,
+        password: passwordHash,
+    })
+
+    try{
+        await user.save()
+        res.status(201).json({msg:'Usuário criado com sucesso!'})
+    } catch (error) {
+        console.loh(error)
+        res.status(500).json({msg: 'Erro no servidor'})
+    }
 })
 
-const dbUser = process.env.DB_USER
-const dbPassword = process.env.DB_PASS
+
+
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PASS;
 
 // console.log('user: ' + dbUser) 
 // console.log('password: ' + dbPassword)
 
 mongoose.connect(
-    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.wr9w6qa.mongodb.net/sample_mflix?retryWrites=true&w=majority&appName=Cluster0`,
+    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.wr9w6qa.mongodb.net/authProject?retryWrites=true&w=majority&appName=Cluster0`,
     // `mongodb://localhost:27017/sample_mflix`,
 ).then(() => {
     app.listen(3000)
