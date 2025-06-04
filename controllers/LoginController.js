@@ -28,14 +28,18 @@ class LoginController {
   static async login(req, res) {
     console.log('LoginController.login called');
     const { email, password } = req.body;
+    console.log('login body:', req.body);
     if (!email) return res.status(422).json({ msg: 'O email é obrigatorio' });
     if (!password) return res.status(422).json({ msg: 'A senha é obrigatorio' });
     const user = await User.findOne({ email });
+    console.log('user found:', user);
     if (!user) return res.status(404).json({ msg: 'Usuario não encontrado!' });
 
     const checkPassword = await bcrypt.compare(password, user.password);
+    console.log('checkPassword:', checkPassword);
 
     if (!checkPassword) return res.status(422).json({ msg: 'Senha inválida!' });
+    console.log('Senha válida, gerando tokens...');
     try {
       const secret = process.env.SECRET;
       const accessToken = jwt.sign({ id: user._id }, secret, { expiresIn: '1h' });
@@ -53,6 +57,7 @@ class LoginController {
         refreshToken
       });
     } catch (error) {
+      console.error('Erro ao gerar token:', error);
       res.status(500).json({ msg: 'Erro no servidor' });
     }
   }
