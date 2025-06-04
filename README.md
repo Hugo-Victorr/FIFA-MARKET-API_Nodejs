@@ -1,4 +1,4 @@
-# Ultimate Team API
+# FIFA MARKET API
 
 API RESTful desenvolvida em Node.js para gerenciar um sistema de FIFA MARKET, permitindo o gerenciamento de jogadores, posições, vendas e autenticação de usuários.
 
