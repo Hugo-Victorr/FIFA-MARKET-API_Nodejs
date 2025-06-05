@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 class LoginController {
   static async register(req, res) {
-    const { name, email, password, confirmpassword } = req.body;
+    const { name, email, age,  password, confirmpassword } = req.body;
     if (!name) return res.status(422).json({ msg: 'O nome é obrigatorio!' });
     if (!email) return res.status(422).json({ msg: 'O email é obrigatorio!' });
     if (!password) return res.status(422).json({ msg: 'A senha é obrigatoria!' });
@@ -16,7 +16,7 @@ class LoginController {
     
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
-    const user = User({ name, email, password: passwordHash });
+    const user = User({ name, email, age, password: passwordHash });
     try {
       await user.save();
       res.status(201).json({ msg: 'Usuário criado com sucesso!' });
@@ -57,7 +57,7 @@ class LoginController {
         refreshToken
       });
     } catch (error) {
-      console.error('Erro ao gerar token:', error);
+      console.error('Erro ao gerar token:', error); 
       res.status(500).json({ msg: 'Erro no servidor' });
     }
   }

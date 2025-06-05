@@ -40,7 +40,6 @@ class VendaController {
   static async update(req, res) {
     try {
       console.log('update venda called');
-      // id sempre por params (rota /atualiza/:id)
       const id = req.params.id;
       if (!id) return res.status(400).json({ error: 'ID é obrigatório para atualizar' });
       const venda = await Venda.findOneAndUpdate(
@@ -58,7 +57,6 @@ class VendaController {
   static async delete(req, res) {
     try {
       console.log('delete venda called');
-      // id sempre por params (rota /delete/:id)
       const id = req.params.id;
       if (!id) return res.status(400).json({ error: 'ID é obrigatório para deletar' });
       const venda = await Venda.findOneAndDelete({ _id: id, user: req.userId });

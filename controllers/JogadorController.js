@@ -40,7 +40,6 @@ class JogadorController {
   static async update(req, res) {
     try {
       console.log('update jogador called');
-      // id sempre por params (rota /atualiza/:id)
       const id = req.params.id;
       if (!id) return res.status(400).json({ error: 'ID é obrigatório para atualizar' });
       const jogador = await Jogador.findOneAndUpdate(

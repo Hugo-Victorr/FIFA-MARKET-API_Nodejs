@@ -40,7 +40,7 @@ mongoose.connect(
     // `mongodb://localhost:27017/sample_mflix`,
 ).then(() => {
     app.listen(3000)
-    console.log('Conectou ao banco!')
+    console.log('Conectou ao banco!') 
 })
 .catch((err) => console.log(err))
 
