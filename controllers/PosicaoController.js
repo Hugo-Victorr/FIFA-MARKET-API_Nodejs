@@ -39,7 +39,6 @@ class PosicaoController {
   static async update(req, res) {
     try {
       console.log('update posiçao called');
-      // id sempre por params (rota /atualiza/:id)
       const id = req.params.id;
       console.log('id: ' + id);
       if (!id) return res.status(400).json({ error: 'ID é obrigatório para atualizar' });
@@ -58,7 +57,6 @@ class PosicaoController {
   static async delete(req, res) {
     try {
       console.log('delete posiçao called');
-      // id sempre por params (rota /delete/:id)
       const id = req.params.id;
       if (!id) return res.status(400).json({ error: 'ID é obrigatório para deletar' });
       const posicao = await Posicao.findOneAndDelete({ _id: id, user: req.userId });

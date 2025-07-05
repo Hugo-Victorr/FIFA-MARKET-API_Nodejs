@@ -2,6 +2,10 @@
 
 API RESTful desenvolvida em Node.js para gerenciar um sistema de FIFA MARKET, permitindo o gerenciamento de jogadores, posições, vendas e autenticação de usuários.
 
+## Consumo da API em APP Mobile React Native
+
+https://github.com/Hugo-Victorr/FIFA-MARKET-React_Native
+
 ## 🚀 Tecnologias Utilizadas
 
 - Node.js

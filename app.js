@@ -4,9 +4,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const app = express();
 
-// const User = require("./models/User"); 
+const app = express();
 
 app.use(express.json());
 
@@ -37,7 +36,7 @@ const dbPassword = process.env.DB_PASS;
 
 mongoose.connect(
     `mongodb+srv://${dbUser}:${dbPassword}@cluster0.wr9w6qa.mongodb.net/authProject?retryWrites=true&w=majority&appName=Cluster0`,
-    // `mongodb://localhost:27017/sample_mflix`,
+
 ).then(() => {
     app.listen(3000)
     console.log('Conectou ao banco!') 

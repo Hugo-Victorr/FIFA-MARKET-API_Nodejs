@@ -29,7 +29,6 @@ class VendaItemController {
   static async getById(req, res) {
     try {
       console.log('getById vendaItem called');
-      // console.log('vendaItem quantidade:', );
       const id = req.params.id;
       console.log('id:', id);
       const vendaItem = await VendaItem.findOne({ venda_id: req.params.id, user: req.userId });

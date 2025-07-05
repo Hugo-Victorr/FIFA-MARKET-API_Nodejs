@@ -25,6 +25,7 @@ class LoginController {
     }
   }
 
+
   static async login(req, res) {
     console.log('LoginController.login called');
     const { email, password } = req.body;
@@ -42,11 +43,11 @@ class LoginController {
     console.log('Senha válida, gerando tokens...');
     try {
       const secret = process.env.SECRET;
-      const accessToken = jwt.sign({ id: user._id }, secret, { expiresIn: '1h' });
-      const refreshToken = jwt.sign({ id: user._id }, secret, { expiresIn: '7d' });
+      const accessToken = jwt.sign({ id: user._id }, secret, { expiresIn: '15m' });
+      const refreshToken = jwt.sign({ id: user._id }, secret, { expiresIn: '1d' });
       user.refreshToken = refreshToken;
       await user.save();
-      // Remove senha e refreshToken do objeto retornado
+      
       const userObj = user.toObject();
       delete userObj.password;
       delete userObj.refreshToken;
@@ -64,28 +65,28 @@ class LoginController {
 
   static async refreshToken(req, res) {
     const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(401).json({ msg: 'Refresh token não enviado' });
+    if (!refreshToken) return res.status(403).json({ msg: 'Refresh token não encontrado' });
     try {
       const secret = process.env.SECRET;
-      const payload = jwt.verify(refreshToken, secret);
-      const user = await User.findById(payload.id);
+      const decoded = jwt.verify(refreshToken, secret);
+      const user = await User.findById(decoded.id);
       if (!user || user.refreshToken !== refreshToken) {
         return res.status(403).json({ msg: 'Refresh token inválido ou expirado! Faça login nvamente.' });
       }
       const newAccessToken = jwt.sign({ id: user._id }, secret, { expiresIn: '15m' });
-      // (Opcional) Gerar novo refreshToken e atualizar no banco
-      // const newRefreshToken = jwt.sign({ id: user._id }, secret, { expiresIn: '7d' });
-      // user.refreshToken = newRefreshToken;
-      // await user.save();
       res.json({ accessToken: newAccessToken });
     } catch (error) {
-      res.status(403).json({ msg: 'Refresh token inválido ou expirado! Faça login nvamente.' });
+      if (error.name === 'TokenExpiredError') {
+        return res.status(403).json({ message: 'RefreshToken expired' });
+      }
+      res.status(403).json({ msg: 'Refresh token inválido ou expirado! Faça login novamente.' });
     }
   }
 
   static async getUser(req, res) {
     const id = req.params.id;
     try {
+      console.log('Buscando usuário com ID:', id);
       const user = await User.findById(id, "-password");
       if (!user) {
         return res.status(404).json({ msg: "Usuário não encontrado!" });
@@ -93,21 +94,6 @@ class LoginController {
       res.status(200).json({ user });
     } catch (error) {
       res.status(500).json({ msg: 'Erro ao buscar usuário' });
-    }
-  }
-
-  static checkToken(req, res, next) {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ msg: "Acesso negado!" });
-    }
-    try {
-      const secret = process.env.SECRET;
-      jwt.verify(token, secret);
-      next();
-    } catch (error) {
-      res.status(400).json({ msg: "O token é invalido" });
     }
   }
 }

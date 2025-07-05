@@ -12,7 +12,6 @@ class JogadorController {
   }
 
   static getUserIdFromRequest(req) {
-    // Prioriza o userId do token (req.userId), mas permite header para debug
     return req.userId || req.headers['x-user-id'];
   }
 
@@ -57,7 +56,6 @@ class JogadorController {
   static async delete(req, res) {
     try {
       console.log('delete jogador called');
-      // id sempre por params (rota /delete/:id)
       const id = req.params.id;
       if (!id) return res.status(400).json({ error: 'ID é obrigatório para deletar' });
       const jogador = await Jogador.findOneAndDelete({ _id: id, user: req.userId });
