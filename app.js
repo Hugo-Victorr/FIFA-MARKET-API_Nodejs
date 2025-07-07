@@ -3,11 +3,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
-
 const app = express();
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerJson = require("./swagger.json");
+
 app.use(express.json());
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerJson));
 
 const User = require('./models/User')
 

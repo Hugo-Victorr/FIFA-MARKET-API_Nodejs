@@ -1,0 +1,769 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "FIFA-MARKET-API",
+    "version": "1.0.0",
+    "description": "API para gerenciamento de jogadores, posições e vendas no mercado FIFA"
+  },
+  "components": {
+    "securitySchemes": {
+        "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+        }
+    }
+  },  
+  "servers": [{"url": "http://localhost:3000"}
+  ],
+  "paths": {
+    "/auth/register": {
+    "post": {
+      "summary": "Registrar um novo usuário",
+      "tags": ["Auth"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["name", "email", "password", "confirmpassword"],
+              "properties": {
+                "name": { "type": "string", "example": "Teste" },
+                "email": { "type": "string", "example": "teste@email.com" },
+                "age": { "type": "integer", "example": 30 },
+                "password": { "type": "string", "example": "123456" },
+                "confirmpassword": { "type": "string", "example": "123456" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": { "description": "Usuário criado com sucesso" },
+        "422": { "description": "Erro de validação" },
+        "500": { "description": "Erro interno do servidor" }
+      }
+    }
+    },
+    "/auth/login": {
+    "post": {
+      "summary": "Login de usuário",
+      "tags": ["Auth"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["email", "password"],
+              "properties": {
+                "email": { "type": "string", "example": "teste@email.com" },
+                "password": { "type": "string", "example": "123456" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Login realizado com sucesso",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "msg": { "type": "string" },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "_id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "email": { "type": "string" },
+                      "age": { "type": "integer" }
+                    }
+                  },
+                  "accessToken": { "type": "string" },
+                  "refreshToken": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "422": { "description": "Email ou senha inválidos" },
+        "500": { "description": "Erro interno do servidor" }
+      }
+    }
+    },
+    "/auth/refresh": {
+    "post": {
+      "summary": "Atualizar token de acesso",
+      "tags": ["Auth"],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["refreshToken"],
+              "properties": {
+                "refreshToken": { "type": "string", "example": "eyJhbGci..." }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Novo accessToken gerado",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accessToken": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "403": { "description": "Refresh token inválido ou expirado" }
+      }
+    }
+    },
+    "/auth/user/{id}": {
+    "get": {
+      "summary": "Buscar usuário por ID",
+      "tags": ["Auth"],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "ID do usuário"
+        }
+      ],
+      "security": [{"bearerAuth": []}
+      ],
+      "responses": {
+        "200": {
+          "description": "Usuário encontrado",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "_id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "email": { "type": "string" },
+                      "age": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": { "description": "Usuário não encontrado" },
+        "500": { "description": "Erro no servidor" }
+      }
+    }
+    },
+    "/jogador/adiciona": {
+  "post": {
+    "summary": "Adicionar novo jogador",
+    "tags": ["Jogador"],
+    "security": [{ "bearerAuth": [] }],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "nome": { "type": "string", "example": "Neymar Jr" },
+              "posicao": { "type": "string", "example": "Atacante" },
+              "idade": { "type": "integer", "example": 32 }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": { "description": "Jogador criado com sucesso" },
+      "400": { "description": "Erro de validação" }
+    }
+  }
+    },
+    "/jogador/": {
+  "get": {
+    "summary": "Listar todos os jogadores do usuário autenticado",
+    "tags": ["Jogador"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "200": {
+        "description": "Lista de jogadores",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": { "type": "object" }
+            }
+          }
+        }
+      },
+      "500": { "description": "Erro ao buscar jogadores" }
+    }
+  }
+    },
+    "/jogador/{id}": {
+  "get": {
+    "summary": "Buscar jogador por ID",
+    "tags": ["Jogador"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID do jogador"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Jogador encontrado",
+        "content": {
+          "application/json": {
+            "schema": { "type": "object" }
+          }
+        }
+      },
+      "404": { "description": "Jogador não encontrado" }
+    }
+  }
+    },
+    "/jogador/atualiza/{id}": {
+  "put": {
+    "summary": "Atualizar dados de um jogador",
+    "tags": ["Jogador"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID do jogador"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "nome": { "type": "string", "example": "Neymar Junior" },
+              "posicao": { "type": "string", "example": "Atacante" },
+              "idade": { "type": "integer", "example": 32 }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Jogador atualizado com sucesso" },
+      "404": { "description": "Jogador não encontrado" },
+      "400": { "description": "Erro na requisição" }
+    }
+  }
+    },
+    "/jogador/delete/{id}": {
+  "delete": {
+    "summary": "Remover um jogador por ID",
+    "tags": ["Jogador"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID do jogador"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Jogador removido com sucesso" },
+      "404": { "description": "Jogador não encontrado" },
+      "400": { "description": "ID inválido" }
+    }
+  }
+    },
+    "/jogador/deleteAll": {
+  "delete": {
+    "summary": "Deletar todos os jogadores (não implementado)",
+    "tags": ["Jogador"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "501": {
+        "description": "Não implementado"
+      }
+    }
+  }
+    },
+    "/jogador/clear": {
+      "post": {
+        "summary": "Remove todos os jogadores do usuário autenticado",
+        "tags": ["Jogador"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Jogadores removidos com sucesso" },
+          "500": { "description": "Erro ao remover jogadores" }
+        }
+      }
+    },
+    "/posicao/adiciona": {
+  "post": {
+    "summary": "Adicionar nova posição",
+    "tags": ["Posição"],
+    "security": [{ "bearerAuth": [] }],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["nome"],
+            "properties": {
+              "nome": { "type": "string", "example": "Meia" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": { "description": "Posição criada com sucesso" },
+      "400": { "description": "Erro de validação ou de servidor" }
+    }
+  }
+    },
+    "/posicao/": {
+  "get": {
+    "summary": "Listar todas as posições do usuário",
+    "tags": ["Posição"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "200": {
+        "description": "Lista de posições",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": { "type": "object" }
+            }
+          }
+        }
+      },
+      "500": { "description": "Erro ao buscar posições" }
+    }
+  }
+    },
+    "/posicao/{id}": {
+  "get": {
+    "summary": "Buscar posição por ID",
+    "tags": ["Posição"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID da posição"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Posição encontrada" },
+      "404": { "description": "Posição não encontrada" },
+      "500": { "description": "Erro no servidor" }
+    }
+  }
+    },
+    "/posicao/atualiza/{id}": {
+  "put": {
+    "summary": "Atualizar uma posição existente",
+    "tags": ["Posição"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID da posição a ser atualizada"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "nome": { "type": "string", "example": "Atacante" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Posição atualizada com sucesso" },
+      "400": { "description": "ID ausente ou dados inválidos" },
+      "404": { "description": "Posição não encontrada" }
+    }
+  }
+    },
+    "/posicao/delete/{id}": {
+  "delete": {
+    "summary": "Excluir uma posição por ID",
+    "tags": ["Posição"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID da posição"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Posição removida com sucesso" },
+      "400": { "description": "ID inválido" },
+      "404": { "description": "Posição não encontrada" },
+      "500": { "description": "Erro no servidor" }
+    }
+  }
+    },
+    "/posicao/deleteAll": {
+  "delete": {
+    "summary": "Deletar todas as posições (não implementado)",
+    "tags": ["Posição"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "501": { "description": "Rota não implementada" }
+    }
+  }
+    },
+    "/posicao/clear": {
+  "post": {
+    "summary": "Limpar todas as posições do usuário autenticado",
+    "tags": ["Posição"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "200": { "description": "Posições removidas com sucesso" },
+      "500": { "description": "Erro ao limpar posições" }
+    }
+  }
+    },
+    "/venda/adiciona": {
+  "post": {
+    "summary": "Registrar uma nova venda",
+    "tags": ["Venda"],
+    "security": [{ "bearerAuth": [] }],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "descricao": { "type": "string", "example": "Venda camisa oficial" },
+              "valor": { "type": "number", "example": 99.90 },
+              "data": { "type": "string", "format": "date", "example": "2025-07-03" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": { "description": "Venda criada com sucesso" },
+      "400": { "description": "Erro na requisição" }
+    }
+  }
+    },
+    "/venda/": {
+  "get": {
+    "summary": "Listar todas as vendas do usuário autenticado",
+    "tags": ["Venda"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "200": {
+        "description": "Lista de vendas",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": { "type": "object" }
+            }
+          }
+        }
+      },
+      "500": { "description": "Erro ao buscar vendas" }
+    }
+  }
+    },
+    "/venda/{id}": {
+  "get": {
+    "summary": "Buscar uma venda por ID",
+    "tags": ["Venda"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID da venda"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Venda encontrada" },
+      "404": { "description": "Venda não encontrada" },
+      "500": { "description": "Erro no servidor" }
+    }
+  }
+    },
+    "/venda/atualiza/{id}": {
+  "put": {
+    "summary": "Atualizar uma venda existente",
+    "tags": ["Venda"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID da venda a ser atualizada"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "descricao": { "type": "string", "example": "Venda alterada" },
+              "valor": { "type": "number", "example": 109.90 },
+              "data": { "type": "string", "format": "date", "example": "2025-07-03" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Venda atualizada com sucesso" },
+      "400": { "description": "Erro na requisição" },
+      "404": { "description": "Venda não encontrada" }
+    }
+  }
+    },
+    "/venda/delete/{id}": {
+  "delete": {
+    "summary": "Remover uma venda por ID",
+    "tags": ["Venda"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID da venda"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Venda removida com sucesso" },
+      "400": { "description": "ID inválido" },
+      "404": { "description": "Venda não encontrada" }
+    }
+  }
+    },
+    "/venda/deleteAll": {
+  "delete": {
+    "summary": "Deletar todas as vendas (não implementado)",
+    "tags": ["Venda"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "501": { "description": "Rota não implementada" }
+    }
+  }
+    },
+    "/venda/clear": {
+  "post": {
+    "summary": "Remover todas as vendas do usuário autenticado",
+    "tags": ["Venda"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "200": { "description": "Vendas removidas com sucesso" },
+      "500": { "description": "Erro ao remover vendas" }
+    }
+  }
+    },
+    "/vendaitem/adiciona": {
+  "post": {
+    "summary": "Adicionar um item à venda",
+    "tags": ["VendaItem"],
+    "security": [{ "bearerAuth": [] }],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["venda_id", "produto", "quantidade", "valor"],
+            "properties": {
+              "venda_id": { "type": "string", "example": "60e8fbd90c2e4c001c8a7b3b" },
+              "produto": { "type": "string", "example": "Camisa" },
+              "quantidade": { "type": "integer", "example": 2 },
+              "valor": { "type": "number", "example": 79.90 }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": { "description": "Item adicionado com sucesso" },
+      "400": { "description": "Erro na criação" }
+    }
+  }
+    },
+    "/vendaitem/": {
+  "get": {
+    "summary": "Listar todos os itens de venda do usuário",
+    "tags": ["VendaItem"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "200": {
+        "description": "Lista de itens de venda",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": { "type": "object" }
+            }
+          }
+        }
+      },
+      "500": { "description": "Erro ao buscar itens" }
+    }
+  }
+    },
+    "/vendaitem/{id}": {
+  "get": {
+    "summary": "Listar itens de uma venda específica",
+    "tags": ["VendaItem"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID da venda"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Itens da venda encontrados" },
+      "400": { "description": "ID inválido" },
+      "404": { "description": "Venda não encontrada" }
+    }
+  }
+    },
+    "/vendaitem/atualiza/{id}": {
+  "put": {
+    "summary": "Atualizar um item de venda",
+    "tags": ["VendaItem"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID do item de venda"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "produto": { "type": "string", "example": "Camisa Premium" },
+              "quantidade": { "type": "integer", "example": 3 },
+              "valor": { "type": "number", "example": 89.90 }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Item atualizado com sucesso" },
+      "400": { "description": "ID inválido ou erro de validação" },
+      "404": { "description": "Item não encontrado" }
+    }
+  }
+    },
+    "/vendaitem/delete/{id}": {
+  "delete": {
+    "summary": "Deletar um item de venda por ID",
+    "tags": ["VendaItem"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "ID do item de venda"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Item deletado com sucesso" },
+      "400": { "description": "ID inválido" },
+      "404": { "description": "Item não encontrado" }
+    }
+  }
+    },
+    "/vendaitem/deleteAll": {
+  "delete": {
+    "summary": "Deletar todos os itens de venda (não implementado)",
+    "tags": ["VendaItem"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "501": { "description": "Rota não implementada" }
+    }
+  }
+    },
+    "/vendaitem/clear": {
+  "post": {
+    "summary": "Remover todos os itens de venda do usuário autenticado",
+    "tags": ["VendaItem"],
+    "security": [{ "bearerAuth": [] }],
+    "responses": {
+      "200": { "description": "Todos os itens removidos" },
+      "500": { "description": "Erro ao remover itens" }
+    }
+  }
+    }
+  }
+}
