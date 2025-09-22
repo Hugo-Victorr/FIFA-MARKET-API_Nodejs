@@ -2,6 +2,8 @@
 
 API RESTful desenvolvida em Node.js para gerenciar um sistema de FIFA MARKET, permitindo o gerenciamento de jogadores, posições, vendas e autenticação de usuários.
 
+Front-end: https://github.com/Hugo-Victorr/FIFA-MARKET-React_Native
+
 ## Documentação SWAGGER
 
 ![image](https://github.com/user-attachments/assets/93209b12-42c8-4ddf-92a5-1eb5c7769278) ![image](https://github.com/user-attachments/assets/7921218f-6ce8-4db0-ab48-9bb2f7752276)
